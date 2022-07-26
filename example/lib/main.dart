@@ -1,9 +1,16 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logger/flutter_logger.dart';
 
+import 'app_log_test.dart';
+import 'network_log_test.dart';
+
 void main() {
-  runApp(const MaterialApp(title: 'Flutter Logger', home: TestApp()));
+  runApp(
+    const MaterialApp(
+      title: 'Flutter Logger',
+      home: TestApp(),
+    ),
+  );
 }
 
 class TestApp extends StatefulWidget {
@@ -17,108 +24,69 @@ class TestAppState extends State<TestApp> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      clientLogger.get('exampleURL');
       doDioCommunication('exampleURL2', data: "data");
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-    return SafeArea(
-      child: Container(
-          width: screenWidth,
-          height: screenHeight,
-          decoration: BoxDecoration(color: Colors.purple.shade100),
-          child: Column(
-            children: [
-              const Text("Test Screen 1"),
-              TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => TestApp2(
-                              screenWidth: screenWidth,
-                              screenHeight: screenHeight)),
-                    );
-                  },
-                  child: const Text("Next Page")),
-              const FlutterLogger(),
-              TextButton(
-                  child: const Text("Overflow Test"),
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            content: Padding(
-                              padding: const EdgeInsets.only(bottom: 30.0),
-                              child: Row(
-                                children: const [
-                                  Text(
-                                    '-------------- Overflow Error Test --------------',
-                                    style: TextStyle(
-                                      fontSize: 18.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                child: const Text("Close"),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ],
-                          );
-                        });
-                  }),
-            ],
-          )),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Test Screen 1"),
+        backgroundColor: Colors.grey.shade900,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TestApp2(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.chevron_right, size: 40),
+          ),
+        ],
+      ),
+      body: Center(
+        child: Column(
+          children: const [
+            FlutterLogger(),
+            SizedBox(height: 20),
+            CenterBoldText(text: 'App Log Test'),
+            AppLogTest(),
+            CenterBoldText(text: 'Client Log Test'),
+            NetworkLogTest(),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class TestApp2 extends StatelessWidget {
-  const TestApp2({
-    Key? key,
-    required this.screenWidth,
-    required this.screenHeight,
-  }) : super(key: key);
-  final double screenWidth;
-  final double screenHeight;
+  const TestApp2({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-          width: screenWidth,
-          height: screenHeight,
-          decoration: const BoxDecoration(color: Colors.yellow),
-          child: Column(
-            children: [
-              const Text("Test Screen 2"),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Prev Page")),
-              TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => TestApp3(
-                              screenWidth: screenWidth,
-                              screenHeight: screenHeight)),
-                    );
-                  },
-                  child: const Text("Next Page"))
-            ],
-          )),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Test Screen 2"),
+        backgroundColor: Colors.grey.shade800,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TestApp3(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.chevron_right, size: 40),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -126,76 +94,91 @@ class TestApp2 extends StatelessWidget {
 class TestApp3 extends StatelessWidget {
   const TestApp3({
     Key? key,
-    required this.screenWidth,
-    required this.screenHeight,
   }) : super(key: key);
-  final double screenWidth;
-  final double screenHeight;
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-          width: screenWidth,
-          height: screenHeight,
-          decoration: const BoxDecoration(color: Colors.orange),
-          child: Column(
-            children: [
-              const Text("Test Screen 3"),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Prev Screen"))
-            ],
-          )),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Test Screen 3"),
+        backgroundColor: Colors.grey.shade700,
+      ),
     );
   }
 }
 
-void doDioCommunication(String url, {data}) async {
-  final dio = Dio()
-    ..interceptors.add(
-      ClientLogInterceptor(),
+class BuildCustomButton extends StatelessWidget {
+  final String text;
+  final Function pressEvent;
+  final bool boxShadow;
+  final Color buttonColor;
+  final Color textColor;
+  const BuildCustomButton(
+      {Key? key,
+      required this.text,
+      required this.pressEvent,
+      this.boxShadow = true,
+      this.buttonColor = Colors.red,
+      this.textColor = Colors.white})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.0),
+        boxShadow: [
+          boxShadow
+              ? const BoxShadow(
+                  color: Colors.black,
+                  blurRadius: 2.0,
+                  offset: Offset(2.0, 2.0),
+                )
+              : const BoxShadow(color: Colors.transparent),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          primary: buttonColor,
+          onPrimary: textColor,
+        ),
+        onPressed: () {
+          pressEvent();
+        },
+        child: Text(
+          text,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
     );
-  DateTime requestTime = DateTime.now().toLocal();
-  var request = HttpRequestModel(
-    requestTime,
-    dio.options.method,
-    dio.options.baseUrl + url,
-    dio.options.queryParameters,
-    dio.options.headers,
-    data,
-  );
-
-  try {
-    Response response = await dio.request(
-      url,
-      data: data,
-      queryParameters: dio.options.queryParameters,
-      options: Options(method: 'POST'),
-    );
-    DateTime responseTime = DateTime.now().toLocal();
-    response.headers['date']?[0] = responseTime.toString();
-
-    var httpModel = HttpModel(request, response);
-    Set<OutputCallback> outputCallbacks = ClientLogEvent.getOutputCallbacks;
-
-    // For showing in app
-    for (var callback in outputCallbacks) {
-      callback(httpModel);
-    }
-  } on DioError catch (error) {
-    var httpModel =
-        HttpModel(request, error.response, errorType: error.type.name);
-    Set<OutputCallback> outputCallbacks = ClientLogEvent.getOutputCallbacks;
-
-    // For showing in app
-    for (var callback in outputCallbacks) {
-      callback(httpModel);
-    }
   }
-  // Other Error handling
-  on Error catch (error) {
-    debugPrint(error as String);
+}
+
+class CenterBoldText extends StatelessWidget {
+  final String text;
+  const CenterBoldText({Key? key, required this.text}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.0),
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black,
+            blurRadius: 2.0,
+            offset: Offset(1.0, 1.0),
+          )
+        ],
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
   }
 }
