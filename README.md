@@ -60,24 +60,26 @@ import 'package:flutter_logger/flutter_logger.dart';
     // add FlutterLogger() to your top of you app in any child
     chidren: [
         // ...
+        /* REQUIRED */
         FlutterLogger(),
         // ...
     ]
 
 
-  // for app logs
-  // when error occurs in your application, you can see app logs
+// for app logs
+// when error occurs in your application, you can see app logs
 
 
-  // for client logs
+// for network logs
 void didChangeDependencies() {
     super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+        // network log case 1
         // then call clientLogger.${method}('url', {data, ...})
         clientLogger.get('exampleURL');
 
         // ...
-
+        // network log case 2
         // or make your own dio communication method just by insert ClientLogIntercepter()
         doDioCommunication('exampleURL2', data: "data");
     });
@@ -87,6 +89,8 @@ void didChangeDependencies() {
 void doDioCommunication(String url, {data}) async {
     final dio = Dio()
         ..interceptors.add(
+        /* REQUIRED */
+        // insert ClientLogInterCeptor() here!!! 
         ClientLogInterceptor(),
         );
     DateTime requestTime = DateTime.now().toLocal();
@@ -109,24 +113,31 @@ void doDioCommunication(String url, {data}) async {
         DateTime responseTime = DateTime.now().toLocal();
         response.headers['date']?[0] = responseTime.toString();
 
+        /* REQUIRED */
+        // make httpModel and get OutputCallbacks here
         var httpModel = HttpModel(request, response);
         Set<OutputCallback> outputCallbacks = ClientLogEvent.getOutputCallbacks;
-
-        // For showing in app
+        
+        // for showing in app
+        // add httpModel to outputCallbacks 
         for (var callback in outputCallbacks) {
-        callback(httpModel);
+          callback(httpModel);
         }
+        /*  */
     } on DioError catch (error) {
+        // must write here to see error debug too
+        // make httpModel and get OutputCallbacks here
         var httpModel =
             HttpModel(request, error.response, errorType: error.type.name);
         Set<OutputCallback> outputCallbacks = ClientLogEvent.getOutputCallbacks;
 
-        // For showing in app
+        // for showing in app
+        // add httpModel to outputCallbacks 
         for (var callback in outputCallbacks) {
-        callback(httpModel);
+          callback(httpModel);
         }
     }
-    // Other Error handling
+    // other error handling
     on Error catch (error) {
         debugPrint(error as String);
     }
@@ -134,7 +145,7 @@ void doDioCommunication(String url, {data}) async {
 ```
 
 More see at 
-  > [Example code](./example/lib/main.dart) <br/>
+  > [Example code](./example/lib) <br/>
 
 
 ## License
