@@ -1,7 +1,7 @@
 name: flutter_logger
-description: Flutter Logger 
-version: 0.0.1
-homepage:
+description: You can see app, network logs to help your debugging
+version: 1.0.0
+homepage: https://github.com/rjsduf0503/flutter_logger
 
 environment:
   sdk: ">=2.17.1 <3.0.0"
